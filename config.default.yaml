@@ -1,0 +1,19 @@
+# The complete URL to the dynmap tile cache
+domain: http://www.EXAMPLE.com/
+
+# The view is the size at which the area is screenshotted
+# Choose an integer from 0 - 7
+# The lower the view, the higher resolution your snapshots,
+# and they will take up more space on disk
+view: 1
+
+# The map coordinates of the area you want to capture
+# starting from bottom left (x1,z1) to top right (x2, z2)
+bounds:
+  x1: -500
+  z1: -500
+  x2: 500
+  z2: 500
+
+# The size of a MC chunk (should never change)
+chunkSize: 16

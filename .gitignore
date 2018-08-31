@@ -1,0 +1,6 @@
+*.yaml
+*.xlsx
+*.png
+*.swp
+!config.default.yaml
+
