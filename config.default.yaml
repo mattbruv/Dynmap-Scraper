@@ -5,7 +5,7 @@ domain: http://www.EXAMPLE.com/
 # Choose an integer from 0 - 7
 # The lower the view, the higher resolution your snapshots,
 # and they will take up more space on disk
-view: 1
+view: 2
 
 # The map coordinates of the area you want to capture
 # starting from bottom left (x1,z1) to top right (x2, z2)
@@ -17,3 +17,7 @@ bounds:
 
 # The size of a MC chunk (should never change)
 chunkSize: 16
+
+# Google Drive Auto-Upload settings
+uploadToDrive: False
+driveFolder: YOUR-DRIVE-FOLDER-ID-HERE

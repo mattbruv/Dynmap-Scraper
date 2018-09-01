@@ -1,14 +1,18 @@
+import zipfile
 import math
+import shutil
 import sys
 import time
 import urllib.request
 import os
 import yaml
 
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
 def error(message):
     sys.exit("ERROR: {}\nAborting.".format(message))
 
-imageNameFormat = "z_118_118.png"
 imageNameFormat = "{view}{chunkX}_{chunkZ}.png"
 
 def genImageName(view, chunkX, chunkZ):
@@ -41,6 +45,8 @@ if __name__ == '__main__':
 
     data = open("config.yaml", "r")
     config = yaml.load(data)
+
+
 
     # Init config variables
     domain = str(config['domain'])
@@ -75,12 +81,15 @@ if __name__ == '__main__':
         chunkX1, chunkZ1, chunkX2, chunkZ2
     ))
 
-    timestamp = int(time.time())
-    outputPath = str(timestamp) + "/"
+    timestamp = str(int(time.time()))
+    outputPath = timestamp + "/"
     numImages = 0
 
     if not os.path.exists(outputPath):
         os.makedirs(outputPath)
+    
+    zipName = timestamp + ".zip"
+    zipFile = zipfile.ZipFile(zipName, mode="w")
 
     for x in range(chunkX1, (chunkX2 + chunkInterval), chunkInterval):
         for z in range(chunkZ1, (chunkZ2 + chunkInterval), chunkInterval):
@@ -90,7 +99,38 @@ if __name__ == '__main__':
             print("Downloading {}".format(imageURL))
 
             with urllib.request.urlopen(imageURL) as url:
-                with open(outputPath + imageName, 'wb') as f:
+                saveAs = outputPath + imageName
+                with open(saveAs, 'wb') as f:
                     f.write(url.read())
+                    zipFile.write(saveAs)
+
+    zipFile.close()
+    shutil.rmtree(outputPath)
+    print("Finished downloading {} images to {}".format(numImages, zipName))
     
-    print("Finished downloading {} images to {}".format(numImages, outputPath))
+    if config["uploadToDrive"]:
+        gauth = GoogleAuth()
+        gauth.LoadCredentialsFile("mycreds.txt")
+        if gauth.credentials is None:
+            # Authenticate if they're not there
+            gauth.LocalWebserverAuth()
+        elif gauth.access_token_expired:
+            # Refresh them if expired
+            gauth.Refresh()
+        else:
+            # Initialize the saved creds
+            gauth.Authorize()
+        # Save the current credentials to a file
+        gauth.SaveCredentialsFile("mycreds.txt")
+        drive = GoogleDrive(gauth)
+
+        print("Uploading to Google Drive...")
+        file1 = drive.CreateFile({
+            "title": zipName,
+            "parents": [{
+                "kind": "drive#fileLink",
+                "id": config["driveFolder"]
+            }]
+        })
+        file1.SetContentFile(zipName)
+        file1.Upload()

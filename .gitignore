@@ -2,5 +2,7 @@
 *.xlsx
 *.png
 *.swp
+*.zip
+*.json
+*.txt
 !config.default.yaml
-
